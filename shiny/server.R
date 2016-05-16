@@ -5,12 +5,21 @@ shinyServer(
     
     options("width" = 1000)
     
-    userId <- reactive({ processURL(input$grURL) })
+    userId <- eventReactive(input$reload, {
+      processURL(input$grURL)
+    })
     
     dataInput <- reactive({
       input$reload
-      data <- getData(userId())
-      data
+      if (!is.na(userId())) {
+        data <- getData(userId())
+        authorId <- ifAuthorURL(input$grURL)
+        if (!is.na(authorId)) {
+          # if user is author, scrub out author's books from reading list
+          data <- data[data$author_id != authorId,]
+        }
+        data
+      }
     })
     
     output$source_link <- renderUI({

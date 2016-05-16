@@ -2,19 +2,21 @@ library(shiny)
 shinyUI(
   navbarPage("My Goodreads Stats",
     tabPanel("My Information",
-             textInput('grURL',
+             textInput('grURL', # http://www.goodreads.com/author/show/8282486.Victor_A_Davis
                        'Copy/Paste your Goodreads Profile URL:',
-                       value = "http://www.goodreads.com/author/show/8282486.Victor_A_Davis"),
-             actionButton('reload', 'Reload'),
-             conditionalPanel("$('#headData').hasClass('recalculating')", 
-                              tags$div('Downloading your Goodreads activity... You might want to grab a book while you wait...')
+                       value = ""),
+             conditionalPanel("input.grURL !== '' ",
+               actionButton('reload', 'Load my Data'),
+               conditionalPanel("$('#headData').hasClass('recalculating')", 
+                                tags$div('Downloading your Goodreads activity... You might want to grab a book while you wait...')
+               ),
+               fluidRow(
+                 column(width = 2, uiOutput("my_face")),
+                 column(width = 10, verbatimTextOutput("headData"))
+               ),
+               downloadButton('downloadData', 'Save Data'),
+               uiOutput("source_link")
              ),
-             fluidRow(
-               column(width = 2, uiOutput("my_face")),
-               column(width = 10, verbatimTextOutput("headData"))
-             ),
-             downloadButton('downloadData', 'Save Data'),
-             uiOutput("source_link"),
              style = 'width: 100%;'
     ),
     tabPanel("Books per Year",

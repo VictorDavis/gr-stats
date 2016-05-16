@@ -3,17 +3,38 @@ library(ggplot2)
 library(RCurl)
 library(reshape2)
 
+# if author url, return author id
+ifAuthorURL <- function(gurl) {
+  isAuthor <- grepl("author/show/([0-9]*)", gurl)
+  if (isAuthor) {
+    authorId <- regmatches(gurl, regexpr("author/show/([0-9]*)", gurl))
+    authorId <- strsplit(authorId, split = "/")[[1]][3]
+    authorId
+  } else {
+    NA
+  }
+}
+
+# if user url, return user id
+ifUserURL <- function(gurl) {
+  isUser <- grepl("user/show/([0-9]*)", gurl)
+  if (isUser) {
+    userId <- regmatches(gurl, regexpr("user/show/([0-9]*)", gurl))
+    userId <- strsplit(userId, split = "/")[[1]][3]
+    userId
+  } else {
+    NA
+  }
+}
+
 # converts GR url to either userID or author->userID
 processURL <- function(gurl) {
-  isAuthor <- grepl("author/show/([0-9]*)", gurl)
-  isUser <- grepl("user/show/([0-9]*)", gurl)
-  if (!isAuthor & !isUser) {
+  authorId <- ifAuthorURL(gurl)
+  userId <- ifUserURL(gurl)
+  if (is.na(authorId) & is.na(userId)) {
     NA
   } else {
-    userId <- NA
-    if (isAuthor) {
-      authorId <- regmatches(gurl, regexpr("author/show/([0-9]*)", gurl))
-      authorId <- strsplit(authorId, split = "/")[[1]][3]
+    if (!is.na(authorId)) {
       gurl <- paste0("http://tools.mediascover.com/gr-auth.php?id=", authorId, collapse="")
       userId <- read.table(url(gurl))$V1
     } else { # isUser
